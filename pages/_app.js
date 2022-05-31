@@ -1,4 +1,6 @@
 import '../styles/globals.css'
+  
+//we have installed the next-connect
 
 function MyApp({ Component, pageProps }) {
   return <Component {...pageProps} />
