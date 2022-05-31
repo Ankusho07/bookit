@@ -3,7 +3,7 @@
 
 
 import nc from 'next-connect'
-import { allRooms, newRoom ,singleRoom} from '../../../contollers/roomController'
+import { allRooms, newRoom ,singleRoom,updateRoom} from '../../../contollers/roomController'
 import dbConnect  from '../../../config/dbConnect'
 
 
@@ -16,6 +16,8 @@ var db = require('../../../config/dbConnect')
 
 
 handler.get(singleRoom)
+
+handler.put(updateRoom)
 
 
 

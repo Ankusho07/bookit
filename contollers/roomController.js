@@ -80,8 +80,39 @@ res.status(400).json({
 
 
 
+const updateRoom =async (req,res)=>{
+
+    try {
+    
+    let updatedRoom = await Room.findByIdAndUpdate(req.query.id, req.body,{
+        new:true,
+        runValidators:true,
+        useFindAndModify:false
+    });   //in express we use req.params.id
+    
+    res.status(200).json({
+        success:true,
+        room:updatedRoom
+    
+    })
+    
+        
+    } catch (error) {
+        
+    res.status(400).json({
+        success:false,
+        error:error.message
+    })
+    
+    
+    }
+    }
+    
+
+
 export {
     allRooms,
     newRoom,
-    singleRoom
+    singleRoom,
+    updateRoom
 }
