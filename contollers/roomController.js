@@ -1,39 +1,64 @@
 
 
 import Room from "../models/rooms";
+import ErrorHandler from "../utils/errorHandler";
+import catchAsyncErrors from "../middlewares/catchAsyncErrors";
+import APIFeatures from '../utils/apiFeatures'
 
 
 
-
-const allRooms = async (req,res)=>{
+// const allRooms = async (req,res)=>{
    
 
-try {
+// try {
 
-   const room = await Room.find()
+//    const room = await Room.find()
 
-    res.status(200).json({
-        sucess:true,
-        count:room.length,
-        room
-    })
-
-    
-} catch (error) {
-    res.status(400).json({
-        sucess:false,
-        message:error.message
-    })
-
-}
-
-}
+//     res.status(200).json({
+//         sucess:true,
+//         count:room.length,
+//         room
+//     })
 
     
+// } catch (error) {
+//     res.status(400).json({
+//         sucess:false,
+//         message:error.message
+//     })
+
+// }
+
+// }
 
 
-  const newRoom = async (req,res)=>{
-try{
+
+const allRooms = catchAsyncErrors( async (req,res)=>{
+   //search by location implementation
+   
+const apiFeatures = new APIFeatures(Room.find(), req.query).search().filter()  //req.query will contain the parametrs of url
+   
+
+    
+       //const room = await Room.find()
+    
+       const rooms = await apiFeatures.query;
+        res.status(200).json({
+            sucess:true,
+            count:rooms.length,
+            rooms
+        })
+    
+        
+   
+    
+    })
+    
+    
+
+
+  const newRoom =catchAsyncErrors( async (req,res)=>{
+
     
         const room = await Room.create(req.body);
         
@@ -44,21 +69,24 @@ try{
         
         
         
-}catch(error){
 
-    res.status(400).json({
-        success:false,
-        error:error.message
-    })
 
-}
-}
+})
 
-const singleRoom =async (req,res)=>{
+const singleRoom =async (req,res, next)=>{  //next is kind of middleware
 
 try {
 
 const soloRoom = await Room.findById(req.query.id);   //in express we use req.params.id
+if(!soloRoom){
+    // return res.status(404).json({
+    //     success:false,
+    //     message:'room not found with this id'
+    // })
+
+
+    return next(new ErrorHandler('room not found with this id',404))
+}
 
 res.status(200).json({
     success:true,
@@ -80,7 +108,7 @@ res.status(400).json({
 
 
 
-const updateRoom =async (req,res)=>{
+const updateRoom =async (req,res,next)=>{
 
     try {
     
@@ -89,7 +117,11 @@ const updateRoom =async (req,res)=>{
         runValidators:true,
         useFindAndModify:false
     });   //in express we use req.params.id
-    
+
+    if(!updatedRoom){
+        return next(new ErrorHandler('room not found with this id',404))
+    }
+
     res.status(200).json({
         success:true,
         room:updatedRoom
@@ -108,11 +140,42 @@ const updateRoom =async (req,res)=>{
     }
     }
     
+    const deleteSingleRoom  =async (req,res,next)=>{
+
+        try {
+        
+        let room = await Room.findById(req.query.id)
+
+        if(!room){
+            return next(new ErrorHandler('room not found with this id',404))
+        }
+
+        await room.remove();
+        
+        res.status(200).json({
+            success:true,
+            message:"roomDeleted"
+        
+        })
+        
+            
+        } catch (error) {
+            
+        res.status(400).json({
+            success:false,
+            error:error.message
+        })
+        
+        
+        }
+        }
+        
 
 
 export {
     allRooms,
     newRoom,
     singleRoom,
-    updateRoom
+    updateRoom,
+    deleteSingleRoom
 }
